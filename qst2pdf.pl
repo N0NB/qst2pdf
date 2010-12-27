@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 #	qst2pdf.pl -- a script to process the QST View .tif files into one
 #	PDF per issue
@@ -23,6 +23,7 @@ use strict;
 use warnings;
 use Cwd;
 
+my $debug = 1;			# 0 == no debugging output, 1 == debugging output
 my $ver = "2010-12-20";
 my $copy = "2002,2004,2010";
 my $count;
@@ -38,7 +39,7 @@ my $line;
 my $yy;
 my $mm;
 my $in;
-my $cd_dir = "/cdrom";
+my $cd_dir;
 my $out_dir;
 my @years;
 my @months;
@@ -57,6 +58,25 @@ print "QST View into one PDF per issue.  This script will create output\n";
 print "directories for each year/month converted.  You will need write\n";
 print "permissions in the output directory.\n\n\n";
 
+# The QST CDROM has the title of QSTXXXX[_XX] where XXXX is a four digit year,
+# e.g. QST1960, or QST1966_67.  Each year is in a two-digit directory, e.g. 60,
+# and each issue month is in its own directory 1-12.  The complete path to the
+# January 1960 issue would be QST1960/60/1.
+
+# Check HAL mounted CDROM first on /media
+@files = get_files("/media", "d");
+
+if (@files) {
+	foreach $file (@files) {
+		if ($file =~ /^QST\d+_?\d?\d?/) {
+			if ($debug) {print $file, "\n"};
+			$cd_dir = "/media/" . $file;
+		}
+	}
+} else {
+	$cd_dir = "/cdrom";		# fallback for older systems
+}
+
 print "Path to the QST VIEW CD: [$cd_dir] ";
 chomp($in = <STDIN>);
 
@@ -71,17 +91,26 @@ print "Path for the .pdf file(s): [$out_dir] ";
 chomp($in = <STDIN>);
 
 if ($in eq "") {
-	# don't do anything
 } elsif ($in ne $out_dir) {
 	$out_dir = $in;
 }
 
 @years = get_files($cd_dir, "d");
-print "\nPlease select one of the following years:\n";
+
+print "\nThe following years were found and will be processed:\n";
+
 
 while (1) {
-	print "@years\n \nyear: ";
-	chomp($yy = <STDIN>);
+	print "@years\n\n";
+	$yy = shift @years;
+	print "year: [$yy]\n";
+#	chomp($in = <STDIN>);
+
+#	if ($in eq "") {
+#	} elsif ($in ne $yy) {
+#		$yy = $in;
+#	}
+
 	unless (-d "$out_dir/$yy") {
 		`mkdir $out_dir/$yy`;
 	}
@@ -89,11 +118,19 @@ while (1) {
 
 	@temp = get_files("$cd_dir/$yy", "d");
 	@months = sort { $a <=> $b } @temp;
-	print "\nPlease select one of the following months:\n";
+	print "\nThe following months will be converted to PDF:\n";
 
 	while (1) {
-		print "@months\n \nmonth: ";
-		chomp($mm = <STDIN>);
+		print "@months\n\n";
+		$mm = shift @months;
+		print "month: [$mm]\n";
+#		chomp($in = <STDIN>);
+
+#		if ($in eq "") {
+#		} elsif ($in ne $mm) {
+#			$mm = $in;
+#		}
+
 		unless (-d "$out_dir/$yy/$mm") {
 			`mkdir $out_dir/$yy/$mm`;
 		}
@@ -144,18 +181,20 @@ while (1) {
 		`ps2pdf $mrg_file`;
 		unlink($mrg_file);
 		
-		print "Would you like to process another month in $cd_dir/$yy? [Y/n] ";
-		chomp($in = <STDIN>);
+#		print "Would you like to process another month in $cd_dir/$yy? [Y/n] ";
+#		chomp($in = <STDIN>);
 
-		unless ($in =~ /^y/i || $in eq "") {
+#		unless ($in =~ /^y/i || $in eq "") {
+		unless (@months) {
 			chdir("$out_dir/$yy");
 			last;
 		}
 	}
-	print "Would you like to process another year in $cd_dir? [Y/n] ";
-	chomp($in = <STDIN>);
+#	print "Would you like to process another year in $cd_dir? [Y/n] ";
+#	chomp($in = <STDIN>);
 	
-	unless ($in =~ /^y/i || $in eq "") {
+#	unless ($in =~ /^y/i || $in eq "") {
+	unless (@years) {
 		chdir("$out_dir");
 		last;
 	}
