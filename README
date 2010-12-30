@@ -1,31 +1,32 @@
 qst2pdf.pl -- a script to process the QST View .tif files 
 into one PDF per issue
 
-Copyright (C) 2002-2004 by Nate Bargmann, n0nb@arrl.net
+Copyright (C) 2002-2004, 2010 by Nate Bargmann, n0nb@arrl.net
 
 What is it?
 ===========
 
-qst2pdf -- an interactive script to convert the .tif files found on the
-QST VIEW CD set(s) into a convenient cross-platform PDF (Portable Document
-Format) file.  The resulting PDF contains one complete issue of QST and
-can be viewed with Xpdf, Acrobat Reader, gv, etc.
+qst2pdf.pl -- a script to convert the .tif files found on the QST VIEW CD 
+set(s) into a convenient cross-platform PDF (Portable Document Format) file.  
+The resulting PDF contains one complete issue of QST and can be viewed with 
+any PDF reader (Gnome Document Reader, Okular, Xpdf, Acrobat Reader, gv, etc.
 
 Prerequisites
 =============
 
 You will need the following programs (Debian package names are listed):
-	Perl -- perl (perl),
+	Perl (5.10 tested) -- perl (perl),
 	Ghostscript -- ps2pdf (gscommon),
 	Tiff tools -- tiff2ps (libtiff-tools),
 	PS Utils -- epsffit (psutils),
-	100 to 300 MB of free disk space,
-	ability to mount the QST View CD.
+	100 to 300 MB of free disk space per issue,
+	ability to mount the QST View CD (later distributions do this automatically),
+	Perl-doc to view the embedded manual page (--man switch).
 
-While the resulting PDF isn't too big, the temprary PS files are huge.
-For example, to convert the January 1930 issue approximately 200 MB of 
-temporary file space was needed.  Later issues will undoubtedly need 
-more space.
+While the resulting PDF isn't too big (equivalent to the size of an issue's TIFF
+files combined), the temporary PS files are huge.  For example, to convert the
+January 1930 issue approximately 200 MB of temporary file space was needed.  
+Later issues will undoubtedly need more space.
 
 Installation
 ============
@@ -41,30 +42,41 @@ If you made the script executable, just typing qst2pdf.pl at the command
 prompt will get things rolling.  Otherwise you will need to invoke perl
 and give it the path to the script like so:
 	perl ~/bin/qst2pdf.pl
-	
+
 Usage
 =====
 
-The script only works in interactive mode and will prompt with default
-values for some entries.  Entering a new string will replace the prompted 
-value while pressing <Enter> will cause the default to be accepted.
+The script only works in batch mode by default and interactive mode when passed
+the --single option.  In batch mode, the script prompts for confirmation of the
+mount point of the CDROM and then the output directory.  The CDROM is processed
+for each year and issue and once all years have been processed the script exits.
 
-By default the script assumes the CD is mounted on /cdrom and the output
+In interactive mode, CDROM mount point and output directory are confirmed and
+the script will prompt with default values for year and month.  Entering a new
+string will replace the prompted value while pressing <Enter> with no value
+will cause the default to be accepted.
+
+By default the script assumes the CD is mounted under /media with the CDROM
+name as the mount point.  As a fallback, the script will try /cdrom.  The output
 will be in the current working directory.  You may want to create a new
-directory for the PDFs to be written to, ~/qst works well.
+directory for the PDFs to be written to, ~/qst works well (if you have the 
+space.  I use a separate partition mounted as /opt and put my QST files there).
 
 The script will read the directory structure of the QST View CD and will
-prompt you for which year and month to process.  Once a given month has
-been processed the script will prompt for another month in that year.  
-If a selection is not made for the month, the script will prompt for another
+process all files in batch mode, the default.  Interactive mode will prompt
+you for which year and month to process.  Once a given month has been 
+processed the script will prompt for another month in that year.  If a 
+selection is not made for the month, the script will prompt for another
 year and the months in that year can be processed.  
 
 Not selecting a month or year will cause the script to exit.
 
-The output directory structure mirrors that of the source CD.  I have 
-burned the output directory to CD so I now have a portable and convenient
-way to view the old QSTs elsewhere.  I will leave it up to you to understand
-and comply with copyright law regarding the QST content.
+The output directory structure is one directory for each year under the current
+working directory and all issues are individual PDF files in that directory.
+Year directories are four digits and output files are named as YYYY-MM.pdf.
+
+PDF makes viewing each issue convenient and portable.  I will leave it up to
+you to understand and comply with copyright law regarding the QST content.
 
 Bugs
 ====
@@ -73,17 +85,17 @@ The following issues are known at this time.
 
 	o	Write permissions are not checked and the script simply
 		fails if it cannot write a file.
-	
+
 	o	The script will simply die if one of the dependent helper
 		programs cannot be found.
-		
+
 	o	Selections (CD mount point, output directory, etc) are
 		not saved between sessions.
-		
+
 	o	This script is probably considered insecure since it
 		doesn't check for a file's existence and will overwrite
 		any file that previously exists.
-		
+
 Please report any other issues, patches, suggestions, etc to Nate Bargmann,
 n0nb@arrl.net
 
