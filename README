@@ -1,27 +1,28 @@
-qst2pdf.pl -- a script to process the QST View .tif files 
-into one PDF per issue
+qst2pdf.pl -- a script to process the QST View .tif and .jpg (1995 and later 
+issues) files into one PDF per issue
 
-Copyright (C) 2002-2004, 2010 by Nate Bargmann, n0nb@arrl.net
+Copyright (C) 2002,2003,2004, 2010 by Nate Bargmann, n0nb@n0nb.us
 
 What is it?
 ===========
 
-qst2pdf.pl -- a script to convert the .tif files found on the QST VIEW CD 
-set(s) into a convenient cross-platform PDF (Portable Document Format) file.  
-The resulting PDF contains one complete issue of QST and can be viewed with 
-any PDF reader (Gnome Document Reader, Okular, Xpdf, Acrobat Reader, gv, etc.
+qst2pdf.pl -- a script to convert the .tif and .jpg (1995 and later issues) 
+files found on the QST VIEW CD set(s) into a convenient cross-platform PDF 
+(Portable Document Format) file. The resulting PDF contains one complete 
+issue of QST and can be viewed with any PDF reader (Gnome Document Reader, 
+Okular, Xpdf, Acrobat Reader, gv, etc.
 
 Prerequisites
 =============
 
 You will need the following programs (Debian package names are listed):
-	Perl (5.10 tested) -- perl (perl),
-	Ghostscript -- ps2pdf (gscommon),
-	Tiff tools -- tiff2ps (libtiff-tools),
-	PS Utils -- epsffit (psutils),
-	100 to 300 MB of free disk space per issue,
-	ability to mount the QST View CD (later distributions do this automatically),
-	Perl-doc to view the embedded manual page (--man switch).
+    Perl (5.10 tested) -- perl (perl),
+    Ghostscript -- ps2pdf (gscommon),
+    Tiff tools -- tiff2ps (libtiff-tools),
+    PS Utils -- epsffit (psutils),
+    100 to 300 MB of free disk space per issue,
+    ability to mount the QST View CD (later distributions do this automatically),
+    Perl-doc to view the embedded manual page (--man switch).
 
 While the resulting PDF isn't too big (equivalent to the size of an issue's TIFF
 files combined), the temporary PS files are huge.  For example, to convert the
@@ -41,15 +42,18 @@ Invocation
 If you made the script executable, just typing qst2pdf.pl at the command
 prompt will get things rolling.  Otherwise you will need to invoke perl
 and give it the path to the script like so:
-	perl ~/bin/qst2pdf.pl
+    perl ~/bin/qst2pdf.pl
 
 Usage
 =====
 
-The script only works in batch mode by default and interactive mode when passed
-the --single option.  In batch mode, the script prompts for confirmation of the
-mount point of the CDROM and then the output directory.  The CDROM is processed
-for each year and issue and once all years have been processed the script exits.
+The script works in batch mode by default and interactive mode when passed 
+the --single option.  In batch mode, the script prompts for confirmation of 
+the mount point of the CDROM and then the output directory.  The CDROM is 
+processed for each year and issue and once all years have been processed the 
+script exits.  Note that if your system does not create a mount point that 
+is the title of the CDROM, e.g. QST1995, the script will fail to parse the 
+century correctly.
 
 In interactive mode, CDROM mount point and output directory are confirmed and
 the script will prompt with default values for year and month.  Entering a new
@@ -57,7 +61,7 @@ string will replace the prompted value while pressing <Enter> with no value
 will cause the default to be accepted.
 
 By default the script assumes the CD is mounted under /media with the CDROM
-name as the mount point.  As a fallback, the script will try /cdrom.  The output
+title as the mount point.  As a fallback, the script will try /cdrom.  The output
 will be in the current working directory.  You may want to create a new
 directory for the PDFs to be written to, ~/qst works well (if you have the 
 space.  I use a separate partition mounted as /opt and put my QST files there).
@@ -83,21 +87,21 @@ Bugs
 
 The following issues are known at this time.
 
-	o	Write permissions are not checked and the script simply
-		fails if it cannot write a file.
+    o   Write permissions are not checked and the script simply
+        fails if it cannot write a file.
 
-	o	The script will simply die if one of the dependent helper
-		programs cannot be found.
+    o   The script will simply die if one of the dependent helper
+        programs cannot be found.
 
-	o	Selections (CD mount point, output directory, etc) are
-		not saved between sessions.
+    o   Selections (CD mount point, output directory, etc) are
+        not saved between sessions.
 
-	o	This script is probably considered insecure since it
-		doesn't check for a file's existence and will overwrite
-		any file that previously exists.
+    o   This script is probably considered insecure since it
+        doesn't check for a file's existence and will overwrite
+        any file that previously exists.
 
 Please report any other issues, patches, suggestions, etc to Nate Bargmann,
-n0nb@arrl.net
+n0nb@n0nb.us
 
 Have fun!
 
