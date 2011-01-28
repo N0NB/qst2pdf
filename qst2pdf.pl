@@ -25,19 +25,11 @@ use Cwd;
 use Getopt::Long;
 use Pod::Usage;
 
-my $ver = "2011-01-21";
+my $ver = "2011-01-27";
 my $copy = "2002,2003,2004,2010,2011";
-my $count;
 my $year;
 my $month;
 my $file;
-my $tmp_file;
-my $ps_file;
-my $pgm_file;
-my $mrg_file;
-my $pdf_file;
-my $merge = "";
-my $line;
 my $cc;
 my $yy;
 my $mm;
@@ -52,7 +44,6 @@ my @years;
 my @months;
 my @files;
 my @temp;
-my @bbox;
 
 # Parse command line options
 argv_opts();
@@ -160,76 +151,8 @@ while (1) {
             }
         }
 
-        my $out_debug;
-        if ($debug) {
-            $out_debug = '';
-        } else {
-            $out_debug = ' 2> /dev/null'
-        }
-        $count = 0;
-        $merge = '';
-        @files = get_files("$cd_dir/$yy/$mm", "r");
-        foreach $file (@files) {
-            if ($file =~ m#.*\.tif$#) {
-                $tmp_file = $ps_file = $file;
-                $tmp_file =~ s/\.tif/.tmp/;
-                $ps_file =~ s/\.tif/.ps/;
-                `tiff2ps -1 -e $cd_dir/$yy/$mm/$file -O $tmp_file$out_debug`;
-            }
-            elsif ($file =~ m#.*\.jpg$#) { # 1995 issues and later have graphics in jpg abd text in tif
-                my $out_debug;
-                if ($debug) {
-                    $out_debug = '';
-                } else {
-                    $out_debug = ' 2> /dev/null'
-                }
-                $tmp_file = $ps_file = $pgm_file = $file;
-                $pgm_file =~ s/\.jpg/.pgm/;
-                $tmp_file =~ s/\.jpg/.tmp/;
-                $ps_file =~ s/\.jpg/.ps/;
-                `jpegtopnm $cd_dir/$yy/$mm/$file > $pgm_file$out_debug`;
-                `pnmtops $pgm_file > $tmp_file$out_debug`;
-                unlink($pgm_file);
-            }
-            
-            open(TMP, "< $tmp_file") or die "Cannot open $tmp_file: $!\n";
-            while ($line = <TMP>) {
-                if ($line =~ /^\%\%BoundingBox:/) {
-                    last;
-                }
-            }
-            close(TMP);
-            chomp $line;
-
-            @bbox = split ' ', $line;
-            shift @bbox;
-            $bbox[0] = int((612 - $bbox[2]) / 2);
-            $bbox[1] = int((792 - $bbox[3]) / 2);
-            $bbox[2] += $bbox[0];
-            $bbox[3] += $bbox[1];
-            `epsffit $bbox[0] $bbox[1] $bbox[2] $bbox[3] $tmp_file $ps_file$out_debug`;
-            $merge = $merge . $ps_file . " ";
-            $count++;
-            unlink($tmp_file);
-            print ".";
-        }
-
-        # Mangle filename for final output
-        $mrg_file = $cc . $ps_file;         # Add century digits to filename
-        $mrg_file =~ s/(^\d{4})(\d{2}).*/$1\-$2.ps/;    # Cut to six_digits.ps
-
-        `gs -dNOPAUSE -sDEVICE=pswrite -dBATCH -sOutputFile=$mrg_file $merge$out_debug`;
-
-        print "\n$count .ps files merged into $mrg_file\n";
-
-        unless($count == unlink(split(' ', $merge))) {
-            warn "Could not remove all the .ps files after merge: $!";
-        }
-
-        print "Converting $mrg_file into PDF\n";
-        `ps2pdf $mrg_file$out_debug`;
-        unlink($mrg_file);
-
+        convert_files($cc, $yy, $mm, $cd_dir, $debug);
+        
         unless ($single) {
             unless (@months) {
                 chdir("$out_dir/$cc$yy");
@@ -290,6 +213,99 @@ sub get_files {
     closedir(CD);
     return @names;
 }
+
+
+# Convert the image files into an intermediate PS file, mangle the BoundingBox
+# property and convert to PDF.  Also removes all intermediate files.
+#
+# Expected arguments:
+#   $cc     two digit century
+#   $yy     two digit year
+#   $mm     two digit month
+#   $cd_dir mounted CDROM directory
+#   $debug  debugging flag (set on command line)
+#
+sub convert_files {
+    my ($cc, $yy, $mm, $cd_dir, $debug) = @_;
+
+    my $bbox;
+    my $count = 0;
+    my $file;
+    my $line;
+    my $merge = '';
+    my $mrg_file;
+    my $out_debug;
+    my $pdf_file;
+    my $pgm_file;
+    my $ps_file;
+    my $tmp_file;
+
+    my @bbox;
+    my @files;
+    
+    if ($debug) {
+        $out_debug = '';
+    } else {
+        $out_debug = ' 2> /dev/null'
+    }
+
+    @files = get_files("$cd_dir/$yy/$mm", "r");
+    foreach $file (@files) {
+        if ($file =~ m#.*\.tif$#) {
+            $tmp_file = $ps_file = $file;
+            $tmp_file =~ s/\.tif/.tmp/;
+            $ps_file =~ s/\.tif/.ps/;
+            `tiff2ps -1 -e $cd_dir/$yy/$mm/$file -O $tmp_file$out_debug`;
+        }
+        elsif ($file =~ m#.*\.jpg$#) { # 1995 issues and later have graphics in jpg abd text in tif
+            $tmp_file = $ps_file = $pgm_file = $file;
+            $pgm_file =~ s/\.jpg/.pgm/;
+            $tmp_file =~ s/\.jpg/.tmp/;
+            $ps_file =~ s/\.jpg/.ps/;
+            `jpegtopnm $cd_dir/$yy/$mm/$file > $pgm_file$out_debug`;
+            `pnmtops $pgm_file > $tmp_file$out_debug`;
+            unlink($pgm_file);
+        }
+        
+        open(TMP, "< $tmp_file") or die "Cannot open $tmp_file: $!\n";
+        while ($line = <TMP>) {
+            if ($line =~ /^\%\%BoundingBox:/) {
+                last;
+            }
+        }
+        close(TMP);
+        chomp $line;
+
+        @bbox = split ' ', $line;
+        shift @bbox;
+        $bbox[0] = int((612 - $bbox[2]) / 2);
+        $bbox[1] = int((792 - $bbox[3]) / 2);
+        $bbox[2] += $bbox[0];
+        $bbox[3] += $bbox[1];
+        `epsffit $bbox[0] $bbox[1] $bbox[2] $bbox[3] $tmp_file $ps_file$out_debug`;
+        $merge = $merge . $ps_file . " ";
+        $count++;
+        unlink($tmp_file);
+        print ".";
+    }
+
+    # Mangle filename for final output
+    $mrg_file = $cc . $ps_file;         # Add century digits to filename
+    $mrg_file =~ s/(^\d{4})(\d{2}).*/$1\-$2.ps/;    # Cut to six_digits.ps
+
+    `gs -dNOPAUSE -sDEVICE=pswrite -dBATCH -sOutputFile=$mrg_file $merge$out_debug`;
+
+    print "\n$count .ps files merged into $mrg_file\n";
+
+    unless($count == unlink(split(' ', $merge))) {
+        warn "Could not remove all the .ps files after merge: $!";
+    }
+
+    print "Converting $mrg_file into PDF\n";
+    `ps2pdf $mrg_file$out_debug`;
+    unlink($mrg_file);
+}
+
 
 # Parse the command line for supported options.  Print help text as needed.
 sub argv_opts {

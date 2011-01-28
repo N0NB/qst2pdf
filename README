@@ -1,4 +1,4 @@
-qst2pdf.pl -- a script to process the QST View .tif and .jpg (1995 and later 
+qst2pdf.pl -- a script to process the QST View .tif and .jpg (1995 and later
 issues) files into one PDF per issue
 
 Copyright (C) 2002,2003,2004, 2010 by Nate Bargmann, n0nb@n0nb.us
@@ -6,10 +6,10 @@ Copyright (C) 2002,2003,2004, 2010 by Nate Bargmann, n0nb@n0nb.us
 What is it?
 ===========
 
-qst2pdf.pl -- a script to convert the .tif and .jpg (1995 and later issues) 
-files found on the QST VIEW CD set(s) into a convenient cross-platform PDF 
-(Portable Document Format) file. The resulting PDF contains one complete 
-issue of QST and can be viewed with any PDF reader (Gnome Document Reader, 
+qst2pdf.pl -- a script to convert the .tif and .jpg (1995 and later issues)
+files found on the QST VIEW CD set(s) into a convenient cross-platform PDF
+(Portable Document Format) file. The resulting PDF contains one complete
+issue of QST and can be viewed with any PDF reader (Gnome Document Reader,
 Okular, Xpdf, Acrobat Reader, gv, etc.
 
 Prerequisites
@@ -26,7 +26,7 @@ You will need the following programs (Debian package names are listed):
 
 While the resulting PDF isn't too big (equivalent to the size of an issue's TIFF
 files combined), the temporary PS files are huge.  For example, to convert the
-January 1930 issue approximately 200 MB of temporary file space was needed.  
+January 1930 issue approximately 200 MB of temporary file space was needed.
 Later issues will undoubtedly need more space.
 
 Installation
@@ -47,12 +47,12 @@ and give it the path to the script like so:
 Usage
 =====
 
-The script works in batch mode by default and interactive mode when passed 
-the --single option.  In batch mode, the script prompts for confirmation of 
-the mount point of the CDROM and then the output directory.  The CDROM is 
-processed for each year and issue and once all years have been processed the 
-script exits.  Note that if your system does not create a mount point that 
-is the title of the CDROM, e.g. QST1995, the script will fail to parse the 
+The script works in batch mode by default and interactive mode when passed
+the --single option.  In batch mode, the script prompts for confirmation of
+the mount point of the CDROM and then the output directory.  The CDROM is
+processed for each year and issue and once all years have been processed the
+script exits.  Note that if your system does not create a mount point that
+is the title of the CDROM, e.g. QST1995, the script will fail to parse the
 century correctly.
 
 In interactive mode, CDROM mount point and output directory are confirmed and
@@ -61,17 +61,18 @@ string will replace the prompted value while pressing <Enter> with no value
 will cause the default to be accepted.
 
 By default the script assumes the CD is mounted under /media with the CDROM
-title as the mount point.  As a fallback, the script will try /cdrom.  The output
-will be in the current working directory.  You may want to create a new
-directory for the PDFs to be written to, ~/qst works well (if you have the 
-space.  I use a separate partition mounted as /opt and put my QST files there).
+title as the mount point.  As a fallback, the script will try /cdrom.  The
+output will be in the current working directory.  You may want to create a
+new directory for the PDFs to be written to, ~/qst works well (if you have
+the space.  I use a separate partition mounted as /opt and put my QST files
+there).
 
 The script will read the directory structure of the QST View CD and will
 process all files in batch mode, the default.  Interactive mode will prompt
-you for which year and month to process.  Once a given month has been 
-processed the script will prompt for another month in that year.  If a 
+you for which year and month to process.  Once a given month has been
+processed the script will prompt for another month in that year.  If a
 selection is not made for the month, the script will prompt for another
-year and the months in that year can be processed.  
+year and the months in that year can be processed.
 
 Not selecting a month or year will cause the script to exit.
 
